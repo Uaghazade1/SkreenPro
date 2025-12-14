@@ -4,7 +4,7 @@ import useImage from 'use-image';
 import Konva from 'konva';
 import { ImageCanvasProps, GradientPreset, ShadowSettings, ShadowPreset } from '@/renderer/types';
 
-const BG_IMAGE_URL = '/bg.jpeg';
+const BG_IMAGE_URL = '/bg.JPG';
 
 // Gradient presets with Konva-compatible format
 const GRADIENT_PRESETS: Record<string, GradientPreset> = {

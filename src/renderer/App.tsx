@@ -109,7 +109,7 @@ function App() {
           <div
             className="flex justify-center items-center h-full relative"
             style={{
-              backgroundImage: 'url(/bg.jpeg)',
+              backgroundImage: 'url(/bg.JPG)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
@@ -117,8 +117,8 @@ function App() {
           >
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-[1]" />
             <div className="max-w-[600px] text-center relative z-[2]">
-              <h2 className="text-white text-3xl font-semibold mb-5">Welcome to Image Editor</h2>
-              <p className="text-gray-300 text-lg mb-8 leading-relaxed">Open an image to start editing</p>
+              <h2 className="text-white text-2xl font-medium mb-5">ShotStudio v1.0.1</h2>
+              <p className="text-gray-300 text-md mb-8 leading-relaxed">Open an image to start editing</p>
               <Button
                 onClick={handleOpenImage}
                 size="lg"

@@ -221,7 +221,7 @@ const EditorControls: React.FC<EditorControlsProps> = ({ settings, onChange }) =
                         style={{
                           background:
                             preset.value === 'bg-image'
-                              ? 'url(/bg.jpeg) center/cover'
+                              ? 'url(/bg.JPG) center/cover'
                               : preset.value === 'transparent'
                               ? 'repeating-conic-gradient(#404040 0% 25%, #2a2a2a 0% 50%) 50% / 10px 10px'
                               : preset.value,
