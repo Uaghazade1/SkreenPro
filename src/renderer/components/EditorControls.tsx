@@ -8,7 +8,6 @@ import { Switch } from '@/renderer/components/ui/switch';
 // Background images from public/bgs folder
 const BG_IMAGES = [
   'bg.JPG',
-  'bg1.jpeg',
   'IMG_0020.JPG',
   'IMG_0021.JPG',
   'IMG_0022.JPG',
@@ -18,8 +17,6 @@ const BG_IMAGES = [
   'IMG_0028.JPG',
   'IMG_0029.JPG',
   'IMG_0051.JPG',
-  'IMG_9974 2.JPG',
-  'IMG_9974.JPG',
   'IMG_9979.JPG',
   'IMG_9987.JPG',
 ];
