@@ -1,132 +1,16 @@
-const { app, BrowserWindow, ipcMain, desktopCapturer, Tray, Menu, screen, globalShortcut, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const isDev = process.env.NODE_ENV === 'development';
 
-let editorWindow = null;
-let captureWindow = null;
-let overlayWindow = null;
-let tray = null;
+let mainWindow = null;
 
-// Capture toolbar oluştur (küçük toolbar)
-function createCaptureWindow() {
-  // Eğer zaten açık bir capture window varsa, kapat
-  if (captureWindow) {
-    captureWindow.close();
-    captureWindow = null;
-  }
-
-  const primaryDisplay = screen.getPrimaryDisplay();
-  const { width: screenWidth, height: screenHeight } = primaryDisplay.bounds;
-
-  // Küçük toolbar boyutları
-  const toolbarWidth = 280;
-  const toolbarHeight = 70;
-  const toolbarX = Math.floor((screenWidth - toolbarWidth) / 2);
-  const toolbarY = screenHeight - toolbarHeight - 40; // Alt kısımda, biraz yukarıda
-
-  captureWindow = new BrowserWindow({
-    width: toolbarWidth,
-    height: toolbarHeight,
-    x: toolbarX,
-    y: toolbarY,
-    transparent: true,
-    frame: false,
-    alwaysOnTop: true,
-    skipTaskbar: true,
-    hasShadow: false,
-    resizable: false,
-    webPreferences: {
-      preload: path.join(__dirname, 'src/preload/preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true,
-    },
-  });
-
-  captureWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-  captureWindow.setAlwaysOnTop(true, 'screen-saver', 1);
-
-  if (isDev) {
-    captureWindow.loadURL('http://localhost:5173/#/toolbar');
-  } else {
-    captureWindow.loadFile(path.join(__dirname, 'dist/renderer/index.html'), {
-      hash: 'toolbar'
-    });
-  }
-
-  captureWindow.on('closed', () => {
-    captureWindow = null;
-  });
-}
-
-// Fullscreen overlay oluştur (area selection için)
-function createOverlayWindow() {
-  // Eğer zaten açık bir overlay varsa, kapat
-  if (overlayWindow) {
-    overlayWindow.close();
-    overlayWindow = null;
-  }
-
-  const primaryDisplay = screen.getPrimaryDisplay();
-  const { width, height, x, y } = primaryDisplay.bounds;
-
-  overlayWindow = new BrowserWindow({
-    width,
-    height,
-    x,
-    y,
-    transparent: true,
-    frame: false,
-    alwaysOnTop: true,
-    skipTaskbar: true,
-    hasShadow: false,
-    webPreferences: {
-      preload: path.join(__dirname, 'src/preload/preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true,
-    },
-  });
-
-  overlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-  overlayWindow.setAlwaysOnTop(true, 'screen-saver', 1);
-
-  if (isDev) {
-    overlayWindow.loadURL('http://localhost:5173/#/capture');
-  } else {
-    overlayWindow.loadFile(path.join(__dirname, 'dist/renderer/index.html'), {
-      hash: 'capture'
-    });
-  }
-
-  // Toolbar'ı kapat
-  if (captureWindow) {
-    captureWindow.close();
-    captureWindow = null;
-  }
-
-  overlayWindow.on('closed', () => {
-    overlayWindow = null;
-  });
-}
-
-// Editor window oluştur (sadece screenshot ile)
-function createEditorWindow(screenshotData) {
-  // Screenshot yoksa editor açma
-  if (!screenshotData) {
-    console.log('No screenshot data, not opening editor');
-    return;
-  }
-
-  // Eğer editor zaten açıksa, sadece screenshot'ı güncelle
-  if (editorWindow) {
-    editorWindow.focus();
-    editorWindow.webContents.send('screenshot-captured', screenshotData);
-    return;
-  }
-
-  editorWindow = new BrowserWindow({
+function createWindow() {
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    show: false,
+    minWidth: 800,
+    minHeight: 600,
     webPreferences: {
       preload: path.join(__dirname, 'src/preload/preload.js'),
       nodeIntegration: false,
@@ -134,164 +18,116 @@ function createEditorWindow(screenshotData) {
     },
   });
 
-  if (isDev) {
-    editorWindow.loadURL('http://localhost:5173');
-    editorWindow.webContents.openDevTools();
-  } else {
-    editorWindow.loadFile(path.join(__dirname, 'dist/renderer/index.html'));
-  }
-
-  editorWindow.once('ready-to-show', () => {
-    editorWindow.show();
-    // Screenshot'ı gönder
-    editorWindow.webContents.send('screenshot-captured', screenshotData);
-  });
-
-  editorWindow.on('closed', () => {
-    editorWindow = null;
-  });
-}
-
-// Tray oluştur
-function createTray() {
-  const icon = nativeImage.createEmpty();
-  tray = new Tray(icon);
-
-  if (process.platform === 'darwin') {
-    tray.setTitle('📸');
-  }
-
-  const contextMenu = Menu.buildFromTemplate([
+  // macOS menü uyarılarını önlemek için basit menü oluştur
+  const template = [
     {
-      label: 'Capture Screenshot',
-      accelerator: 'CommandOrControl+Shift+5',
-      click: () => {
-        createCaptureWindow();
-      }
+      label: app.name,
+      submenu: [
+        { role: 'about' },
+        { type: 'separator' },
+        { role: 'quit' }
+      ]
     },
-    { type: 'separator' },
     {
-      label: 'Quit',
-      accelerator: 'CommandOrControl+Q',
-      click: () => {
-        app.quit();
-      }
+      label: 'File',
+      submenu: [
+        { role: 'close' }
+      ]
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' }
+      ]
     }
-  ]);
+  ];
 
-  tray.setToolTip('Screenshot Editor - Click to capture');
-  tray.setContextMenu(contextMenu);
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
 
-  // Tray ikonuna tıklandığında capture window aç
-  tray.on('click', () => {
-    createCaptureWindow();
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:5173');
+    mainWindow.webContents.openDevTools();
+  } else {
+    mainWindow.loadFile(path.join(__dirname, 'dist/renderer/index.html'));
+  }
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
   });
 }
 
-// App hazır olduğunda
 app.whenReady().then(() => {
-  createTray();
+  createWindow();
 
-  // Global shortcut
-  globalShortcut.register('CommandOrControl+Shift+5', () => {
-    createCaptureWindow();
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
   });
-
-  // macOS'ta dock'u gizle
-  if (process.platform === 'darwin') {
-    app.dock.hide();
-  }
 });
 
-// Tüm pencereler kapandığında
 app.on('window-all-closed', () => {
-  // Menu bar uygulaması olduğu için çıkma
-});
-
-// Quit edildiğinde
-app.on('will-quit', () => {
-  globalShortcut.unregisterAll();
-});
-
-// IPC Handlers
-
-// Ekran görüntüsünü yakala
-ipcMain.handle('capture-screen', async () => {
-  try {
-    const sources = await desktopCapturer.getSources({
-      types: ['screen'],
-      thumbnailSize: screen.getPrimaryDisplay().size,
-    });
-
-    if (sources.length > 0) {
-      return sources[0].thumbnail.toDataURL();
-    }
-    return null;
-  } catch (error) {
-    console.error('Error capturing screen:', error);
-    return null;
+  if (process.platform !== 'darwin') {
+    app.quit();
   }
 });
 
-// Capture mode seçildi
-ipcMain.on('start-capture-mode', (event, mode) => {
-  console.log('Capture mode:', mode);
+// Open image file
+ipcMain.handle('open-image', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Open Image',
+    properties: ['openFile'],
+    filters: [
+      { name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'] }
+    ]
+  });
 
-  if (mode === 'fullscreen') {
-    // Tam ekran screenshot al
-    desktopCapturer.getSources({
-      types: ['screen'],
-      thumbnailSize: screen.getPrimaryDisplay().size,
-    }).then(sources => {
-      if (sources.length > 0) {
-        const screenshot = sources[0].thumbnail.toDataURL();
+  if (!result.canceled && result.filePaths.length > 0) {
+    const filePath = result.filePaths[0];
+    const imageBuffer = fs.readFileSync(filePath);
+    const ext = path.extname(filePath).slice(1);
+    const base64Image = `data:image/${ext};base64,${imageBuffer.toString('base64')}`;
 
-        // Toolbar'ı kapat
-        if (captureWindow) {
-          captureWindow.close();
-          captureWindow = null;
-        }
-
-        // Editor'ü aç
-        createEditorWindow(screenshot);
-      }
-    });
-  } else if (mode === 'area') {
-    // Alan seçimi için overlay aç
-    createOverlayWindow();
-  } else if (mode === 'window') {
-    // Window screenshot için overlay aç (şimdilik area ile aynı)
-    createOverlayWindow();
+    return {
+      success: true,
+      data: base64Image,
+      filename: path.basename(filePath)
+    };
   }
+
+  return { success: false };
 });
 
-// Screenshot seçildi - editor'ü aç
-ipcMain.on('screenshot-selected', (event, imageData) => {
-  console.log('Screenshot selected, opening editor');
-
-  // Tüm capture pencerelerini kapat
-  BrowserWindow.getAllWindows().forEach(win => {
-    if (win !== editorWindow) {
-      win.close();
-    }
+// Save image file
+ipcMain.handle('save-image', async (event, imageData) => {
+  const result = await dialog.showSaveDialog(mainWindow, {
+    title: 'Save Image',
+    defaultPath: 'edited-image.png',
+    filters: [
+      { name: 'PNG', extensions: ['png'] },
+      { name: 'JPEG', extensions: ['jpg', 'jpeg'] },
+    ]
   });
 
-  captureWindow = null;
+  if (!result.canceled && result.filePath) {
+    try {
+      // Remove data:image/png;base64, prefix
+      const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      fs.writeFileSync(result.filePath, buffer);
 
-  // Editor'ü screenshot ile aç
-  createEditorWindow(imageData);
-});
-
-// Capture iptal edildi
-ipcMain.on('cancel-capture', () => {
-  console.log('Capture cancelled');
-
-  // Tüm capture pencerelerini kapat
-  BrowserWindow.getAllWindows().forEach(win => {
-    if (win !== editorWindow) {
-      win.close();
+      return { success: true, path: result.filePath };
+    } catch (error) {
+      console.error('Error saving image:', error);
+      return { success: false, error: error.message };
     }
-  });
+  }
 
-  captureWindow = null;
+  return { success: false };
 });

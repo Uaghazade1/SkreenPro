@@ -21,12 +21,17 @@ body {
 }
 
 .header {
-  padding: 20px;
+  padding: 1rem 1.5rem;
   background-color: #2d2d2d;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #3d3d3d;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
 }
 
 .header h1 {
@@ -97,8 +102,35 @@ body {
 }
 
 .welcome-content p {
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
   line-height: 1.6;
+  color: #888;
+  font-size: 1.125rem;
+}
+
+.open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: #007acc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.open-btn:hover {
+  background: #005a9e;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 122, 204, 0.4);
+}
+
+.open-btn:active {
+  transform: translateY(0);
 }
 
 .welcome-content ul {
@@ -174,21 +206,29 @@ body {
 }
 
 .editor {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  overflow: hidden;
 }
 
-.editor-toolbar {
-  display: flex;
-  gap: 10px;
-  padding: 15px;
+.editor-info {
+  padding: 1rem 1.5rem;
   background: #2d2d2d;
   border-bottom: 1px solid #3d3d3d;
 }
 
+.filename {
+  font-size: 0.875rem;
+  color: #999;
+  font-weight: 500;
+}
+
 .toolbar-btn {
-  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
   background: rgba(255, 255, 255, 0.1);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -200,9 +240,13 @@ body {
 }
 
 .toolbar-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+}
+
+.toolbar-btn:active {
+  transform: translateY(0);
 }
 
 .toolbar-btn.active {
@@ -220,9 +264,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #2d2d2d;
-  border-radius: 8px;
-  padding: 20px;
+  background-color: #1a1a1a;
+  padding: 2rem;
   overflow: auto;
   position: relative;
 }
@@ -249,8 +292,9 @@ body {
 .screenshot {
   max-width: 100%;
   max-height: 100%;
-  border-radius: 4px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   position: relative;
   z-index: 1;
 }
