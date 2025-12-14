@@ -40,7 +40,7 @@ const EditorControls: React.FC<EditorControlsProps> = ({ settings, onChange }) =
   ];
 
   return (
-    <div className="bg-card rounded-lg w-[300px] max-h-[calc(100vh-180px)] flex flex-col overflow-hidden border border-border shadow-sm">
+    <div className="bg-card rounded-b-lg w-[300px] max-h-[calc(100vh-180px)] flex flex-col overflow-hidden">
       <Tabs defaultValue="image" className="flex flex-col h-full">
         <TabsList className="grid w-full grid-cols-2 rounded-none border-b h-12">
           <TabsTrigger value="image" className="text-xs font-medium">IMAGE</TabsTrigger>

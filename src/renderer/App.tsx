@@ -66,39 +66,37 @@ function App() {
   return (
     <div className="h-screen flex flex-col bg-background text-foreground">
       {/* Header */}
-      <header className="px-6 py-4 bg-card border-b border-border flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Image Editor</h1>
+      <header className="px-6 py-2 bg-card border-b border-border flex justify-between items-center">
+        <h1 className="text-sm font-medium">ShotStudio v1.0.1</h1>
         <div className="flex gap-3">
-          <Button onClick={handleOpenImage} variant="outline" className="gap-2">
+          <Button onClick={handleOpenImage} size="xs" variant="outline" className="gap-2">
             <FolderOpen size={20} />
             Open Image
           </Button>
           {selectedImage && (
-            <Button onClick={handleSaveImage} className="gap-2">
-              <Save size={20} />
-              Save
+            <Button onClick={handleSaveImage} variant="default" size="xs" className="gap-2">
+              <Save size={18} />
+              Export
             </Button>
           )}
         </div>
       </header>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-5">
+      <div className="flex-1 overflow-auto">
         {selectedImage ? (
           <div className="flex gap-5 h-full overflow-hidden">
             {/* Sidebar */}
-            <div className="flex flex-col gap-4">
-              <div className="px-6 py-4 bg-card rounded-lg">
-                <span className="text-sm text-muted-foreground font-medium">{filename}</span>
-              </div>
+            <div className="flex flex-col gap-4  border-r border-border pr-0.5">
+             
               <EditorControls settings={settings} onChange={setSettings} />
             </div>
 
+            {/* Divider */}
+            <div className="w-px bg-border"></div>
+
             {/* Canvas Container */}
-            <div className="flex-1 flex justify-center items-center rounded-lg overflow-auto relative"
-              style={{
-                background: 'repeating-conic-gradient(#2d2d2d 0% 25%, #1e1e1e 0% 50%) 50% / 20px 20px'
-              }}
+            <div className="flex-1 flex justify-center items-center rounded-lg overflow-auto relative bg-background"
             >
               <ImageCanvas
                 imageSrc={selectedImage}
