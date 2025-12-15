@@ -1,9 +1,11 @@
 import { useState, useRef } from 'react';
-import { FolderOpen, Save } from 'lucide-react';
+import { FolderOpen, Save, LogOut } from 'lucide-react';
 import ImageCanvas from './components/ImageCanvas';
 import EditorControls from './components/EditorControls';
+import LoginScreen from './components/LoginScreen';
 import { Button } from './components/ui/button';
 import { EditorSettings } from './types';
+import { useAuth } from './contexts/AuthContext';
 import Konva from 'konva';
 
 // Extend Window interface for electronAPI
@@ -17,6 +19,7 @@ declare global {
 }
 
 function App() {
+  const { user, loading, signOut } = useAuth();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [filename, setFilename] = useState<string>('');
   const stageRef = useRef<Konva.Stage | null>(null);
@@ -63,12 +66,38 @@ function App() {
     stageRef.current = ref.current;
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login screen if not authenticated
+  if (!user) {
+    return <LoginScreen />;
+  }
+
   return (
     <div className="h-screen flex flex-col bg-background text-foreground">
       {/* Header */}
       <header className="px-6 py-2 bg-card border-b border-border flex justify-between items-center">
         <h1 className="text-sm font-medium">ShotStudio v1.0.1</h1>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
+          <span className="text-xs text-muted-foreground">{user.email}</span>
           <Button onClick={handleOpenImage} size="xs" variant="outline" className="gap-2">
             <FolderOpen size={20} />
             Open Image
@@ -79,6 +108,10 @@ function App() {
               Export - 4K
             </Button>
           )}
+          <Button onClick={handleSignOut} size="xs" variant="destructive" className="gap-2">
+            <LogOut size={16} />
+           
+          </Button>
         </div>
       </header>
 
