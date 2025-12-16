@@ -61,9 +61,6 @@
       "!**/*.tsx",
       "!**/*.map"
     ],
-    "asarUnpack": [
-      "dist/renderer/**/*"
-    ],
     "mac": {
       "icon": "public/icons/icon.icns",
       "category": "public.app-category.graphics-design",
