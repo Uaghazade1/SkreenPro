@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, shell, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const isDev = process.env.NODE_ENV === 'development';
@@ -6,12 +6,33 @@ const isDev = process.env.NODE_ENV === 'development';
 let mainWindow = null;
 
 function createWindow() {
+  // Create icon - use PNG for dev, icns for production
+  let icon = null;
+
+  if (isDev) {
+    // In development, use PNG (more reliable for hot reload)
+    const pngPath = path.join(__dirname, 'public/icons/512-mac_converted.png');
+    if (fs.existsSync(pngPath)) {
+      icon = nativeImage.createFromPath(pngPath);
+      console.log('Dev mode: Using PNG icon from', pngPath);
+    } else {
+      console.log('Dev mode: PNG icon not found at', pngPath);
+    }
+  } else {
+    // In production, use icns
+    const iconPath = path.join(__dirname, 'public/icons/icon.icns');
+    if (fs.existsSync(iconPath)) {
+      icon = nativeImage.createFromPath(iconPath);
+      console.log('Production mode: Using icns icon from', iconPath);
+    }
+  }
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     minWidth: 800,
     minHeight: 600,
-    icon: path.join(__dirname, 'public/icons/icon.icns'),
+    icon: icon,
     webPreferences: {
       preload: path.join(__dirname, 'src/preload/preload.js'),
       nodeIntegration: false,
@@ -64,6 +85,27 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  // Set dock icon for macOS
+  if (process.platform === 'darwin') {
+    let dockIconPath;
+
+    if (isDev) {
+      // Use PNG in development
+      dockIconPath = path.join(__dirname, 'public/icons/512-mac_converted.png');
+    } else {
+      // Use icns in production
+      dockIconPath = path.join(__dirname, 'public/icons/icon.icns');
+    }
+
+    if (fs.existsSync(dockIconPath)) {
+      const dockIcon = nativeImage.createFromPath(dockIconPath);
+      app.dock.setIcon(dockIcon);
+      console.log('Dock icon set from', dockIconPath);
+    } else {
+      console.log('Dock icon not found at', dockIconPath);
+    }
+  }
+
   createWindow();
 
   app.on('activate', () => {
