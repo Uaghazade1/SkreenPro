@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "NODE_ENV=development concurrently \"vite\" \"npm run start:electron\"",
     "start:electron": "wait-on http://localhost:5173 && electron .",
-    "build": "vite build",
+    "build": "vite build && mkdir -p dist/preload && cp src/preload/preload.js dist/preload/preload.js",
     "electron": "electron .",
     "dist": "npm run build && electron-builder"
   },
@@ -51,15 +51,20 @@
     "appId": "com.skreenpro.app",
     "productName": "SkreenPro",
     "files": [
-      "dist/**/*",
+      "dist/renderer/**/*",
+      "dist/preload/**/*",
       "electron.js",
-      "src/preload/**/*",
       "public/**/*",
       "!node_modules/**/*",
       "!src/**/*",
       "!**/*.ts",
       "!**/*.tsx",
-      "!**/*.map"
+      "!**/*.map",
+      "!dist/*.dmg",
+      "!dist/*.zip",
+      "!dist/*.blockmap",
+      "!dist/*.yml",
+      "!dist/mac-arm64"
     ],
     "mac": {
       "icon": "public/icons/icon.icns",
