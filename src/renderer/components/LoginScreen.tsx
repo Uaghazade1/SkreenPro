@@ -92,10 +92,19 @@ const LoginScreen = () => {
 
           <div className="mt-6 text-center">
             <p className="text-xs text-muted-foreground">
-              By signing in, you agree to our 
-              <a href="https://skreen.pro/terms" className="underline hover:text-primary ml-1">
-              Terms of Service
-              </a>
+              By signing in, you agree to our
+              <button
+                onClick={async () => {
+                  if (window.electronAPI?.openExternal) {
+                    await window.electronAPI.openExternal('https://skreen.pro/terms');
+                  } else {
+                    window.open('https://skreen.pro/terms', '_blank');
+                  }
+                }}
+                className="underline hover:text-primary ml-1 cursor-pointer"
+              >
+                Terms of Service
+              </button>
             </p>
           </div>
         </div>

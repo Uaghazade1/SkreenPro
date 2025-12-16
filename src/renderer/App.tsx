@@ -18,6 +18,7 @@ declare global {
     electronAPI?: {
       openImage: () => Promise<{ success: boolean; data?: string; filename?: string }>;
       saveImage: (data: string) => Promise<{ success: boolean }>;
+      openExternal: (url: string) => Promise<{ success: boolean }>;
     };
   }
 }
@@ -140,7 +141,14 @@ function App() {
           <div className="flex items-center gap-3">
             <h1 className="text-sm font-medium">SkreenPro v1.0.1</h1>
             <Button
-              onClick={() => window.open('https://github.com/Uaghazade1/sshot', '_blank')}
+              onClick={async () => {
+                if (window.electronAPI?.openExternal) {
+                  await window.electronAPI.openExternal('https://github.com/Uaghazade1/sshot');
+                } else {
+                  console.error('electronAPI.openExternal not available');
+                  window.open('https://github.com/Uaghazade1/sshot', '_blank');
+                }
+              }}
               size="xs"
               variant="outline"
               className="gap-2"
