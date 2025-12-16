@@ -35,7 +35,7 @@ const LoginScreen = () => {
     <div
       className="flex justify-center items-center h-screen relative"
       style={{
-        backgroundImage: 'url(/bg.JPG)',
+        backgroundImage: `url(${window.location.protocol === 'file:' ? './bg.JPG' : '/bg.JPG'})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',

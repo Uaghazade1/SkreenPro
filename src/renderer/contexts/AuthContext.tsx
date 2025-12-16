@@ -36,14 +36,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Handle OAuth callback from Electron (production only)
+    const handleOAuthCallback = async (_event: any, url: string) => {
+      console.log('Handling OAuth callback:', url);
+
+      // Extract the hash fragment from the custom protocol URL
+      // Format: skreenpro://auth/callback#access_token=...
+      const hashIndex = url.indexOf('#');
+      if (hashIndex !== -1) {
+        const hash = url.substring(hashIndex);
+
+        // Parse the hash to get session data
+        const params = new URLSearchParams(hash.substring(1));
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+
+        if (accessToken) {
+          // Set the session using the tokens from the callback
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || '',
+          });
+
+          if (error) {
+            console.error('Error setting session from OAuth callback:', error);
+          } else {
+            console.log('Successfully authenticated via OAuth callback');
+          }
+        }
+      }
+    };
+
+    // Listen for OAuth callbacks from Electron
+    if (window.electronAPI) {
+      (window as any).electron?.ipcRenderer?.on('oauth-callback', handleOAuthCallback);
+    }
+
+    return () => {
+      subscription.unsubscribe();
+      if (window.electronAPI) {
+        (window as any).electron?.ipcRenderer?.removeListener('oauth-callback', handleOAuthCallback);
+      }
+    };
   }, []);
 
   const signInWithGithub = async () => {
+    // Use custom protocol for Electron, localhost for dev
+    const redirectTo = window.location.protocol === 'file:'
+      ? 'skreenpro://auth/callback'
+      : window.location.origin;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: window.location.origin,
+        redirectTo,
       },
     });
     if (error) {
@@ -53,10 +99,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
+    // Use custom protocol for Electron, localhost for dev
+    const redirectTo = window.location.protocol === 'file:'
+      ? 'skreenpro://auth/callback'
+      : window.location.origin;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin,
+        redirectTo,
       },
     });
     if (error) {

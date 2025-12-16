@@ -73,7 +73,7 @@ const ImageCanvas: React.FC<ImageCanvasProps> = ({ imageSrc, settings, onExport 
 
   // Extract background image URL if it's a bg-image type
   const bgImageUrl = settings.backgroundColor.startsWith('bg-image:')
-    ? `/bgs/${settings.backgroundColor.replace('bg-image:', '')}`
+    ? `${window.location.protocol === 'file:' ? './bgs/' : '/bgs/'}${settings.backgroundColor.replace('bg-image:', '')}`
     : null;
   const [bgImage] = useImage(bgImageUrl || '');
 

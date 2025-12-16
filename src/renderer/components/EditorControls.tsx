@@ -261,7 +261,7 @@ const EditorControls: React.FC<EditorControlsProps> = ({ settings, onChange }) =
                             : 'border-border hover:border-primary/50'
                         }`}
                         style={{
-                          background: `url(/bgs/${bgImage}) center/cover`,
+                          background: `url(${window.location.protocol === 'file:' ? './bgs/' : '/bgs/'}${bgImage}) center/cover`,
                         }}
                         onClick={() => handleChange('backgroundColor', `bg-image:${bgImage}`)}
                         title={bgImage}

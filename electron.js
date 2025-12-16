@@ -5,6 +5,11 @@ const isDev = process.env.NODE_ENV === 'development';
 
 let mainWindow = null;
 
+// Register custom protocol for OAuth callbacks
+if (!isDev) {
+  app.setAsDefaultProtocolClient('skreenpro');
+}
+
 function createWindow() {
   // Create icon - use PNG for dev, icns for production
   let icon = null;
@@ -83,6 +88,20 @@ function createWindow() {
     mainWindow = null;
   });
 }
+
+// Handle OAuth callback URLs
+app.on('open-url', (event, url) => {
+  event.preventDefault();
+
+  console.log('Received OAuth callback URL:', url);
+
+  if (mainWindow) {
+    if (url.startsWith('skreenpro://')) {
+      // Forward the OAuth callback to the renderer
+      mainWindow.webContents.send('oauth-callback', url);
+    }
+  }
+});
 
 app.whenReady().then(() => {
   // Set dock icon for macOS
