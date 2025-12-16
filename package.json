@@ -54,7 +54,15 @@
       "dist/**/*",
       "electron.js",
       "src/preload/**/*",
-      "public/**/*"
+      "public/**/*",
+      "!node_modules/**/*",
+      "!src/**/*",
+      "!**/*.ts",
+      "!**/*.tsx",
+      "!**/*.map"
+    ],
+    "asarUnpack": [
+      "dist/renderer/**/*"
     ],
     "mac": {
       "icon": "public/icons/icon.icns",
