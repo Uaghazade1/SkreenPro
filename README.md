@@ -219,4 +219,4 @@ If you encounter any issues or have questions:
 
 ---
 
-Made with ❤️ by the SkreenPro team
+Made with ❤️ by [uaghazadae](https://x.com/uaghazade)
