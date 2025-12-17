@@ -10,9 +10,9 @@
     "electron": "electron .",
     "dist": "npm run build && electron-builder"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["screenshot", "editor", "electron", "image-editor", "macos"],
+  "author": "SkreenPro",
+  "license": "MIT",
   "type": "commonjs",
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
